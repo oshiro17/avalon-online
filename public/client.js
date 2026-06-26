@@ -124,14 +124,20 @@ function renderRole(){
   (S.visibility?.names||[]).forEach(nm=>{
     const li=document.createElement("li"); li.textContent=esc(nm); ul.appendChild(li);
   });
-  // ready済みの人数表示
-  const waiting = S.players.filter(p=>!p.connected).length;
-  $("roleWait").textContent = "全員が確認するとクエストが始まります";
+  // 確認の進捗（誰が未確認か）と、自分が確認済みか（サーバーが正）
+  const readyIds = S.readyIds || [];
+  const total = S.players.length;
+  const pending = S.players.filter(p=>!readyIds.includes(p.id)).map(p=>p.name);
+  const iAmReady = readyIds.includes(S.you.id);
+  $("btnReady").disabled = iAmReady;
+  $("btnReady").textContent = iAmReady ? "確認済み" : "確認した";
+  $("roleWait").textContent = `確認済み ${readyIds.length}/${total}`
+    + (pending.length ? `（待ち：${pending.join("・")}）` : "（まもなく開始）");
 }
 $("btnReady").onclick = () => {
   socket.emit("ready",{playerId,code:S.code});
-  $("btnReady").disabled = true;
-  $("roleWait").textContent = "他のプレイヤーを待っています…";
+  $("btnReady").disabled = true; // 二重送信防止。届かなければ次の更新で押し直せる
+  $("roleWait").textContent = "送信しました…他のプレイヤーを待っています";
 };
 
 // ── メインボード ──
@@ -148,7 +154,12 @@ function renderBoard(){
     if(i===S.questIndex && !S.questResults[i]) cls+=" current";
     q.className=cls;
     const twoFail = fails[i]===2 ? "★" : "";
-    q.innerHTML=`<span class="num">${sizes[i]||""}</span><span>人${twoFail}</span>`;
+    let label = "";
+    if(S.questResults[i]==="success") label = "成功";
+    else if(S.questResults[i]==="fail") label = "失敗";
+    else if(i===S.questIndex) label = "進行中";
+    q.innerHTML=`<span class="num">${sizes[i]||""}</span><span class="pp">人${twoFail}</span>`
+      + `<span class="qlabel">${label}</span>`;
     track.appendChild(q);
   }
 
@@ -156,6 +167,25 @@ function renderBoard(){
   $("boardStatus").innerHTML =
     `クエスト ${S.questIndex+1} ／ リーダー：<b>${esc(leader?leader.name:"")}</b>`
     + (S.rejectCount>0 ? `<div class="rejects">連続否決 ${S.rejectCount}/5</div>` : "");
+
+  // 直近の投票の開示（誰が賛成/反対したか）
+  const vr=$("voteResult");
+  if(S.lastVote && S.lastVote.tally && S.lastVote.tally.length){
+    const yes=S.lastVote.tally.filter(t=>t.approve).length;
+    const no=S.lastVote.tally.length-yes;
+    vr.innerHTML =
+      `<div class="vr-head">前回の投票：`
+      + (S.lastVote.approved?`<b class="ok">承認</b>`:`<b class="ng">否決</b>`)
+      + `（賛成 ${yes}・反対 ${no}）</div>`
+      + `<ul class="vr-list">`
+      + S.lastVote.tally.map(t=>
+          `<li class="${t.approve?'yes':'no'}"><span>${esc(t.name)}</span>`
+          + `<span>${t.approve?'賛成':'反対'}</span></li>`).join("")
+      + `</ul>`;
+    vr.classList.remove("hidden");
+  } else {
+    vr.innerHTML=""; vr.classList.add("hidden");
+  }
 
   // 自分の役職を常に小さく表示
   const info = ROLE_INFO[S.myRole];

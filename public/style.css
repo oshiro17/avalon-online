@@ -80,8 +80,22 @@ button.reject{background:var(--reject);color:#2a0606}
 .quest-track .q.fail{background:var(--evil);border-color:var(--evil);color:#fff}
 .quest-track .q.fail .num{color:#fff}
 .quest-track .q.current{outline:2px solid var(--gold)}
+.quest-track .q .pp{font-size:11px}
+.quest-track .q .qlabel{margin-top:2px;font-size:11px;font-weight:800;line-height:1}
+.quest-track .q.success .qlabel,.quest-track .q.fail .qlabel{color:#fff}
+.quest-track .q.current .qlabel{color:var(--gold)}
 
 .board-status{text-align:center;color:var(--muted);font-size:14px}
+
+/* 直近の投票の開示（誰が賛成/反対したか） */
+.vote-result{margin:6px auto;max-width:440px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.vote-result .vr-head{text-align:center;font-size:13px;color:var(--muted);margin-bottom:6px}
+.vote-result .vr-head .ok{color:var(--good)}
+.vote-result .vr-head .ng{color:var(--evil)}
+.vote-result .vr-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.vote-result .vr-list li{display:flex;gap:6px;align-items:center;font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
+.vote-result .vr-list li.yes{background:rgba(70,170,100,.18);border-color:var(--good)}
+.vote-result .vr-list li.no{background:rgba(200,80,80,.18);border-color:var(--evil)}
 .instruction{
   text-align:center;background:var(--panel);border:1px solid var(--gold);
   padding:14px;border-radius:12px;font-size:16px;font-weight:700;color:var(--gold)

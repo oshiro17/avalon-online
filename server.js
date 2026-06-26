@@ -102,6 +102,17 @@ function publicState(room, playerId) {
   if (me) base.myVote = room.votes[me.id];
   if (me) base.onMyTeam = room.team.includes(me.id);
 
+  // 直近の投票の開示結果（誰が賛成/反対したか）。投票結果は公開情報。
+  base.lastVote = room._lastVote
+    ? { approved: room._lastVote.approved, tally: room._lastVote.tally }
+    : null;
+
+  // 役職確認フェーズの進捗（誰がまだ「確認した」を押していないか）
+  if (room.phase === "ROLE_REVEAL") {
+    const rs = readySets[room.code] || new Set();
+    base.readyIds = room.players.filter((p) => rs.has(p.id)).map((p) => p.id);
+  }
+
   // 終了時は全役職公開
   if (room.phase === "END") {
     base.winner = room.winner;

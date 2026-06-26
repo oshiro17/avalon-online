@@ -160,6 +160,7 @@ function teamSize(room) {
 function submitTeam(room, teamIds) {
   room.team = teamIds.slice();
   room.votes = {};
+  room._lastVote = null; // 新しい投票が始まるので前回の開示結果は消す
   room.phase = "TEAM_VOTE";
 }
 
