@@ -143,9 +143,11 @@ function resetRound(room) {
   room.missionActions = {};
 }
 
-// 全員が役職確認を終えたらチーム編成へ
+// 接続中の人が全員確認を終えたらチーム編成へ。
+// 切断中の人は確認しようがないので待たない（全員不在の時だけ不成立）。
 function allReady(room, readySet) {
-  return room.players.every((p) => readySet.has(p.id));
+  const present = room.players.filter((p) => p.connected);
+  return present.length > 0 && present.every((p) => readySet.has(p.id));
 }
 
 function beginTeamBuild(room) {

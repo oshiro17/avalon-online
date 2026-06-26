@@ -289,6 +289,11 @@ io.on("connection", (socket) => {
         // 即削除せず、猶予を置いて再接続を待つ（瞬断で部屋が消えるのを防ぐ）
         scheduleRemoval(room, s.playerId);
       }
+      // 役職確認中に誰かが抜けたら、残りの接続者が全員確認済みなら開始する
+      if (room.phase === "ROLE_REVEAL" && readySets[room.code]
+          && G.allReady(room, readySets[room.code])) {
+        G.beginTeamBuild(room);
+      }
       if (rooms[room.code]) broadcast(room);
     }
     delete sessions[socket.id];
