@@ -165,6 +165,14 @@ function renderBoard(){
   }
 
   const leader = S.players.find(p=>p.isLeader);
+  // 勝敗スコア：先に3つで決着（成功3=善の勝利／失敗3=悪の勝利）
+  const succ = S.questResults.filter(r=>r==="success").length;
+  const fl   = S.questResults.filter(r=>r==="fail").length;
+  $("scoreBar").innerHTML =
+    `<span class="sc good">✅ 成功 ${succ}/3</span>`
+    + `<span class="sc evil">❌ 失敗 ${fl}/3</span>`
+    + `<span class="sc note">失敗が3つで悪の勝利／成功が3つで善の勝利</span>`;
+
   $("boardStatus").innerHTML =
     `クエスト ${S.questIndex+1} ／ リーダー：<b>${esc(leader?leader.name:"")}</b>`
     + (S.rejectCount>0 ? `<div class="rejects">連続否決 ${S.rejectCount}/5</div>` : "");

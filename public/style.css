@@ -91,6 +91,12 @@ button.reject{background:var(--reject);color:#2a0606}
 .quest-track .q.current .qlabel{color:var(--gold)}
 .quest-legend{text-align:center;font-size:11px;color:var(--muted);margin:2px 0 0}
 
+.score-bar{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;align-items:center;margin:6px 0 2px}
+.score-bar .sc{font-size:13px;font-weight:800;padding:3px 10px;border-radius:999px}
+.score-bar .sc.good{background:rgba(70,170,100,.18);color:var(--good);border:1px solid var(--good)}
+.score-bar .sc.evil{background:rgba(200,80,80,.18);color:var(--evil);border:1px solid var(--evil)}
+.score-bar .sc.note{background:transparent;color:var(--muted);font-size:11px;font-weight:600;flex-basis:100%;text-align:center;border:0;padding:0}
+
 .board-status{text-align:center;color:var(--muted);font-size:14px}
 .instruction{
   text-align:center;background:var(--panel);border:1px solid var(--gold);
