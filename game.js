@@ -177,7 +177,7 @@ function resolveVote(room) {
   const approvals = room.players.filter((p) => room.votes[p.id]).length;
   const approved = approvals > room.players.length / 2;
   const tally = room.players.map((p) => ({
-    name: p.name, approve: !!room.votes[p.id],
+    id: p.id, name: p.name, approve: !!room.votes[p.id],
   }));
 
   if (approved) {

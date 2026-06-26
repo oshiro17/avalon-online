@@ -168,25 +168,6 @@ function renderBoard(){
     `クエスト ${S.questIndex+1} ／ リーダー：<b>${esc(leader?leader.name:"")}</b>`
     + (S.rejectCount>0 ? `<div class="rejects">連続否決 ${S.rejectCount}/5</div>` : "");
 
-  // 直近の投票の開示（誰が賛成/反対したか）
-  const vr=$("voteResult");
-  if(S.lastVote && S.lastVote.tally && S.lastVote.tally.length){
-    const yes=S.lastVote.tally.filter(t=>t.approve).length;
-    const no=S.lastVote.tally.length-yes;
-    vr.innerHTML =
-      `<div class="vr-head">前回の投票：`
-      + (S.lastVote.approved?`<b class="ok">承認</b>`:`<b class="ng">否決</b>`)
-      + `（賛成 ${yes}・反対 ${no}）</div>`
-      + `<ul class="vr-list">`
-      + S.lastVote.tally.map(t=>
-          `<li class="${t.approve?'yes':'no'}"><span>${esc(t.name)}</span>`
-          + `<span>${t.approve?'賛成':'反対'}</span></li>`).join("")
-      + `</ul>`;
-    vr.classList.remove("hidden");
-  } else {
-    vr.innerHTML=""; vr.classList.add("hidden");
-  }
-
   // 自分の役職を常に小さく表示
   const info = ROLE_INFO[S.myRole];
   let myInfoText = info ? `あなた：${info.name}` : "";
@@ -207,7 +188,13 @@ function renderBoard(){
     let tags="";
     if(p.isLeader) tags+=`<span class="tag leader">リーダー</span>`;
     if(p.onTeam) tags+=`<span class="tag on">出撃</span>`;
-    if(S.phase==="TEAM_VOTE" && p.voted) tags+=`<span class="tag ok">投票済</span>`;
+    // 全員そろうと「投票済」が各自の「賛成/反対」に変わる
+    const voteInfo = S.lastVote && S.lastVote.tally && S.lastVote.tally.find(t=>t.id===p.id);
+    if(voteInfo){
+      tags+= voteInfo.approve ? `<span class="tag yes">賛成</span>` : `<span class="tag no">反対</span>`;
+    } else if(S.phase==="TEAM_VOTE" && p.voted){
+      tags+=`<span class="tag ok">投票済</span>`;
+    }
     if(S.phase==="MISSION" && p.onTeam && p.acted) tags+=`<span class="tag ok">実行済</span>`;
     li.innerHTML=`<span>${esc(p.name)}</span><span>${tags}</span>`;
 
