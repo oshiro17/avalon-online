@@ -22,6 +22,43 @@ function getRoom(code) {
   return code ? rooms[code.toUpperCase()] : null;
 }
 
+// 瞬断（Render無料枠のWebSocket切断など）で部屋が消えないように、
+// 切断しても即削除せず、この時間だけ再接続を待つ。
+const GRACE_MS = 60 * 1000;
+
+// 再接続したらメンバー削除タイマーを取り消す
+function clearRemoval(room, playerId) {
+  const p = room && room.players.find((x) => x.id === playerId);
+  if (p && p._removeTimer) {
+    clearTimeout(p._removeTimer);
+    p._removeTimer = null;
+  }
+}
+
+// 切断後、猶予を置いてから席を整理する（その間に戻ってこなければ削除）
+function scheduleRemoval(room, playerId) {
+  const p = room.players.find((x) => x.id === playerId);
+  if (!p) return;
+  if (p._removeTimer) clearTimeout(p._removeTimer);
+  p._removeTimer = setTimeout(() => {
+    const cur = room.players.find((x) => x.id === playerId);
+    if (!cur || cur.connected) return; // 戻ってきたので何もしない
+    // ロビー中だけ席を整理（人数調整しやすく）。進行中は席を残す。
+    if (room.phase === "LOBBY") {
+      room.players = room.players.filter((x) => x.id !== playerId);
+      if (room.hostId === playerId && room.players.length > 0) {
+        room.hostId = room.players[0].id;
+      }
+      if (room.players.length === 0) {
+        delete rooms[room.code];
+        delete readySets[room.code];
+        return;
+      }
+    }
+    if (rooms[room.code]) broadcast(room);
+  }, GRACE_MS);
+}
+
 // プレイヤーごとに「自分視点」の安全な状態を作る（他人の役職は出さない）
 function publicState(room, playerId) {
   const me = room.players.find((p) => p.id === playerId);
@@ -108,7 +145,8 @@ io.on("connection", (socket) => {
 
     const existing = room.players.find((p) => p.id === playerId);
     if (existing) {
-      // 再接続
+      // 再接続：削除予約をキャンセル
+      clearRemoval(room, playerId);
       existing.connected = true;
       existing.socketId = socket.id;
       if (name) existing.name = name.slice(0, 12);
@@ -134,6 +172,7 @@ io.on("connection", (socket) => {
     if (!room) return cb && cb({ error: "部屋が見つかりません" });
     const p = room.players.find((x) => x.id === playerId);
     if (!p) return cb && cb({ error: "この部屋にあなたの席がありません" });
+    clearRemoval(room, playerId); // 再接続：削除予約をキャンセル
     p.connected = true;
     p.socketId = socket.id;
     sessions[socket.id] = { code: room.code, playerId };
@@ -232,21 +271,12 @@ io.on("connection", (socket) => {
     const room = getRoom(s.code);
     if (room) {
       const p = room.players.find((x) => x.id === s.playerId);
-      if (p) {
+      // 既に別ソケットで再接続済みなら、古いソケットのdisconnectは無視
+      if (p && p.socketId === socket.id) {
         p.connected = false;
         p.socketId = null;
-        // ロビー中で未開始なら席自体を削除（人数調整しやすく）
-        if (room.phase === "LOBBY") {
-          room.players = room.players.filter((x) => x.id !== s.playerId);
-          // ホストが抜けたら次の人へ委譲
-          if (room.hostId === s.playerId && room.players.length > 0) {
-            room.hostId = room.players[0].id;
-          }
-          if (room.players.length === 0) {
-            delete rooms[room.code];
-            delete readySets[room.code];
-          }
-        }
+        // 即削除せず、猶予を置いて再接続を待つ（瞬断で部屋が消えるのを防ぐ）
+        scheduleRemoval(room, s.playerId);
       }
       if (rooms[room.code]) broadcast(room);
     }
