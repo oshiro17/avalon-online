@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>アヴァロン ONLINE</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- 入口 -->
+  <section id="screen-home" class="screen">
+    <h1>AVALON</h1>
+    <p class="sub">準備なしで遊べるオンライン・アヴァロン</p>
+    <input id="nameInput" maxlength="12" placeholder="あなたの名前" />
+    <button id="btnCreate" class="primary">部屋を作る</button>
+    <div class="divider">または</div>
+    <input id="codeInput" maxlength="4" placeholder="合言葉（4文字）" style="text-transform:uppercase" />
+    <button id="btnJoin">部屋に入る</button>
+    <p id="homeError" class="error"></p>
+  </section>
+
+  <!-- ロビー -->
+  <section id="screen-lobby" class="screen hidden">
+    <div class="code-banner">合言葉 <b id="roomCode"></b></div>
+    <p class="hint">この合言葉を仲間に伝えてください（5〜10人）</p>
+    <ul id="playerList" class="players"></ul>
+    <p id="lobbyMsg" class="hint"></p>
+    <button id="btnStart" class="primary hidden">ゲーム開始</button>
+  </section>
+
+  <!-- 役職確認 -->
+  <section id="screen-role" class="screen hidden">
+    <h2>あなたの役職</h2>
+    <div id="roleCard" class="role-card"></div>
+    <p id="roleVisText" class="hint"></p>
+    <ul id="roleVisList" class="badges"></ul>
+    <button id="btnReady" class="primary">確認した</button>
+    <p id="roleWait" class="hint"></p>
+  </section>
+
+  <!-- メインボード（チーム編成/投票/ミッション共通） -->
+  <section id="screen-board" class="screen hidden">
+    <div id="questTrack" class="quest-track"></div>
+    <div id="boardStatus" class="board-status"></div>
+    <div id="instruction" class="instruction"></div>
+
+    <ul id="boardPlayers" class="players selectable"></ul>
+
+    <!-- リーダーのチーム提出 -->
+    <button id="btnSubmitTeam" class="primary hidden">このメンバーで提案</button>
+
+    <!-- 投票 -->
+    <div id="voteButtons" class="vote-row hidden">
+      <button id="btnApprove" class="approve">賛成</button>
+      <button id="btnReject" class="reject">反対</button>
+    </div>
+
+    <!-- ミッション -->
+    <div id="missionButtons" class="vote-row hidden">
+      <button id="btnSuccess" class="approve">成功</button>
+      <button id="btnFail" class="reject">失敗</button>
+    </div>
+
+    <p id="myInfo" class="myinfo"></p>
+  </section>
+
+  <!-- 暗殺 -->
+  <section id="screen-assassinate" class="screen hidden">
+    <h2>暗殺フェーズ</h2>
+    <p id="assassinText" class="hint"></p>
+    <ul id="assassinList" class="players selectable"></ul>
+    <button id="btnAssassinate" class="primary hidden">この人を討つ</button>
+  </section>
+
+  <!-- 結果 -->
+  <section id="screen-end" class="screen hidden">
+    <h2 id="endTitle"></h2>
+    <p id="endReason" class="hint"></p>
+    <ul id="revealList" class="reveal"></ul>
+    <button id="btnPlayAgain" class="primary hidden">もう一度遊ぶ</button>
+    <p id="endWait" class="hint"></p>
+  </section>
+
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+</html>
