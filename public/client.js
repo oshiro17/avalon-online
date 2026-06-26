@@ -154,11 +154,18 @@ function renderBoard(){
     if(i===S.questIndex && !S.questResults[i]) cls+=" current";
     q.className=cls;
     const need = fails[i] || 1; // このクエストが失敗する「失敗の数」
-    let label = "";
+    const play = (S.questPlays||[])[i]; // 終了したクエストの内訳 {fails,total}
+    let label = "", top;
     if(S.questResults[i]==="success") label = "成功";
     else if(S.questResults[i]==="fail") label = "失敗";
     else if(i===S.questIndex) label = "進行中";
-    q.innerHTML=`<span class="qtop ${need>=2?'warn':''}">✕${need}</span>`
+    if(play){ // 終了済み: 実際の失敗✕・成功⭕の人数
+      const succ = (play.total||0) - (play.fails||0);
+      top = `<span class="qtop done">✕${play.fails} ⭕${succ}</span>`;
+    } else { // 未プレイ: 何人失敗で陥落するか
+      top = `<span class="qtop ${need>=2?'warn':''}">✕${need}</span>`;
+    }
+    q.innerHTML = top
       + `<span class="num">${sizes[i]||""}<small class="pp">人</small></span>`
       + `<span class="qlabel">${label}</span>`;
     track.appendChild(q);

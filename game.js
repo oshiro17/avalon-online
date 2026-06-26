@@ -56,6 +56,7 @@ function createRoom(hostPlayerId, hostName) {
     leaderIndex: 0,       // players配列上のリーダー位置
     questIndex: 0,        // 0..4
     questResults: [],     // "success" | "fail"
+    questPlays: [],       // 各クエストの内訳 {fails, total}
     rejectCount: 0,       // 連続否決回数
     // 現クエストの一時状態
     team: [],             // 選抜されたplayerIdの配列
@@ -133,6 +134,7 @@ function startGame(room) {
   room.leaderIndex = Math.floor(Math.random() * room.players.length);
   room.questIndex = 0;
   room.questResults = [];
+  room.questPlays = [];
   room.rejectCount = 0;
   resetRound(room);
 }
@@ -221,6 +223,7 @@ function resolveMission(room) {
   const success = fails < need;
 
   room.questResults.push(success ? "success" : "fail");
+  room.questPlays.push({ fails, total: room.team.length });
   const result = { fails, need, success, questIndex: room.questIndex };
 
   const successes = room.questResults.filter((r) => r === "success").length;

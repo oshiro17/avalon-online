@@ -80,6 +80,7 @@ function publicState(room, playerId) {
     youAreLeader: leader ? leader.id === playerId : false,
     questIndex: room.questIndex,
     questResults: room.questResults,
+    questPlays: room.questPlays || [],
     rejectCount: room.rejectCount,
     questTeamSizes: room.players.length >= 5
       ? G.QUEST_TEAM[room.players.length] : null,
@@ -264,6 +265,7 @@ io.on("connection", (socket) => {
     if (!room || room.hostId !== playerId) return;
     room.phase = "LOBBY";
     room.questResults = [];
+    room.questPlays = [];
     room.questIndex = 0;
     room.rejectCount = 0;
     room.winner = null;
