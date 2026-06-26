@@ -153,12 +153,13 @@ function renderBoard(){
     else if(S.questResults[i]==="fail") cls+=" fail";
     if(i===S.questIndex && !S.questResults[i]) cls+=" current";
     q.className=cls;
-    const twoFail = fails[i]===2 ? "★" : "";
+    const need = fails[i] || 1; // このクエストが失敗する「失敗の数」
     let label = "";
     if(S.questResults[i]==="success") label = "成功";
     else if(S.questResults[i]==="fail") label = "失敗";
     else if(i===S.questIndex) label = "進行中";
-    q.innerHTML=`<span class="num">${sizes[i]||""}</span><span class="pp">人${twoFail}</span>`
+    q.innerHTML=`<span class="qtop ${need>=2?'warn':''}">✕${need}</span>`
+      + `<span class="num">${sizes[i]||""}<small class="pp">人</small></span>`
       + `<span class="qlabel">${label}</span>`;
     track.appendChild(q);
   }

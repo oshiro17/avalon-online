@@ -82,10 +82,14 @@ button.reject{background:var(--reject);color:#2a0606}
 .quest-track .q.fail{background:var(--evil);border-color:var(--evil);color:#fff}
 .quest-track .q.fail .num{color:#fff}
 .quest-track .q.current{outline:2px solid var(--gold)}
-.quest-track .q .pp{font-size:11px}
+.quest-track .q .pp{font-size:11px;font-weight:600;margin-left:1px}
+.quest-track .q .qtop{font-size:10px;font-weight:800;line-height:1;color:var(--muted);margin-bottom:1px}
+.quest-track .q .qtop.warn{color:var(--evil)}
+.quest-track .q.success .qtop,.quest-track .q.fail .qtop{color:rgba(255,255,255,.85)}
 .quest-track .q .qlabel{margin-top:2px;font-size:11px;font-weight:800;line-height:1}
 .quest-track .q.success .qlabel,.quest-track .q.fail .qlabel{color:#fff}
 .quest-track .q.current .qlabel{color:var(--gold)}
+.quest-legend{text-align:center;font-size:11px;color:var(--muted);margin:2px 0 0}
 
 .board-status{text-align:center;color:var(--muted);font-size:14px}
 .instruction{
