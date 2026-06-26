@@ -2,13 +2,18 @@
 const socket = io();
 
 // ── 永続ID（再接続用） ──
-let playerId = localStorage.getItem("avalon_pid");
+// テスト用: URLに ?u=1 のように付けると、同じブラウザでも別プレイヤーとして扱える
+// （localStorageのキーを ?u の値で分離する）。本番は付けないので従来通り。
+const NS = new URLSearchParams(location.search).get("u") || "";
+const K = (key) => (NS ? `${key}__${NS}` : key);
+
+let playerId = localStorage.getItem(K("avalon_pid"));
 if (!playerId) {
   playerId = "p_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-  localStorage.setItem("avalon_pid", playerId);
+  localStorage.setItem(K("avalon_pid"), playerId);
 }
-let myName = localStorage.getItem("avalon_name") || "";
-let roomCode = localStorage.getItem("avalon_room") || "";
+let myName = localStorage.getItem(K("avalon_name")) || "";
+let roomCode = localStorage.getItem(K("avalon_room")) || "";
 
 const ROLE_INFO = {
   merlin:   { name: "マーリン",     side: "good", desc: "悪が全員見えるが、暗殺者に正体を知られてはいけない" },
@@ -33,10 +38,10 @@ $("codeInput").value = roomCode;
 $("btnCreate").onclick = () => {
   const name = $("nameInput").value.trim();
   if(!name){ $("homeError").textContent="名前を入れてください"; return; }
-  myName = name; localStorage.setItem("avalon_name", name);
+  myName = name; localStorage.setItem(K("avalon_name"), name);
   socket.emit("createRoom", { playerId, name }, (res) => {
     if(res.error){ $("homeError").textContent=res.error; return; }
-    roomCode = res.code; localStorage.setItem("avalon_room", roomCode);
+    roomCode = res.code; localStorage.setItem(K("avalon_room"), roomCode);
   });
 };
 
@@ -45,10 +50,10 @@ $("btnJoin").onclick = () => {
   const code = $("codeInput").value.trim().toUpperCase();
   if(!name){ $("homeError").textContent="名前を入れてください"; return; }
   if(!code){ $("homeError").textContent="合言葉を入れてください"; return; }
-  myName = name; localStorage.setItem("avalon_name", name);
+  myName = name; localStorage.setItem(K("avalon_name"), name);
   socket.emit("joinRoom", { playerId, name, code }, (res) => {
     if(res.error){ $("homeError").textContent=res.error; return; }
-    roomCode = res.code; localStorage.setItem("avalon_room", roomCode);
+    roomCode = res.code; localStorage.setItem(K("avalon_room"), roomCode);
   });
 };
 
@@ -58,7 +63,7 @@ socket.on("connect", () => {
     socket.emit("resume", { playerId, code: roomCode }, (res) => {
       if(res && res.error){
         // 部屋が消えていたらホームへ
-        localStorage.removeItem("avalon_room"); roomCode="";
+        localStorage.removeItem(K("avalon_room")); roomCode="";
         show("home");
       }
     });
